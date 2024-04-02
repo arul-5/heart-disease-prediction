@@ -10,7 +10,6 @@ def preprocess_input(input_tuple):
     return input_reshaped
 
 def preprocess_data(data):
-    data_dict = data.dict()
-    data_dict = {key: int(value) if isinstance(value, np.int64) else value for key, value in data_dict.items()}
+    data_dict = {key: int(value) if isinstance(value, np.int64) else value for key, value in data.items()}
     args = list(data_dict.values())
     return args
