@@ -11,8 +11,7 @@ with open('model.pkl', 'rb') as model_file:
     model = pickle.load(model_file)
 
 app = FastAPI()
-
-
+db = conn['heart-disease']
 # Define the input data model
 class UserData(BaseModel):
     age: int
@@ -34,7 +33,7 @@ async def store_user_data(data: UserData):
     try:
         data_dict = data.dict()
         data_dict['processed'] = False
-        conn.test.test.insert_one(data_dict)
+        db.user_data.insert_one(data_dict)
         return {"message": "User data stored successfully"}
     except Exception as e:
         print(f"Error storing user data: {e}")
@@ -43,7 +42,7 @@ async def store_user_data(data: UserData):
 # When fetching user data for prediction
 @app.get("/predict_from_mongodb")
 async def predict_from_mongodb():
-    user_data = conn.test.test.find_one({"processed": False})  # Fetch the first unprocessed user data
+    user_data = db.user_data.find_one({"processed": False})  # Fetch the first unprocessed user data
     if user_data:
         user_id = user_data.pop('_id', None)  # Remove _id from the user_data for ML model
         user_data.pop('processed', None)  # Remove the processed field
@@ -61,10 +60,10 @@ async def predict_from_mongodb():
                 
                 # Insert the prediction result back to MongoDB with _id
             if user_id:
-                conn.test.test.update_one({"_id": user_id}, {"$set": {"prediction": output}})
+                db.user_data.update_one({"_id": user_id}, {"$set": {"prediction": output}})
                 
                 # Mark the record as processed
-            conn.test.test.update_one({"_id": user_id}, {"$set": {"processed": True}})
+            db.user_data.update_one({"_id": user_id}, {"$set": {"processed": True}})
                 
             return {"prediction": output}
         else:
