@@ -29,17 +29,11 @@ class UserData(BaseModel):
     ca: int
     thal: int
 
-# Define endpoints
-@app.post("/predict")
-async def predict(data: UserData):
+@app.post("/store_user_data")
+async def store_user_data(data: UserData):
     data_dict = data.dict()
-    args = preprocess_data(data)
-    preprocessed_input = preprocess_input(args)
-    prediction = model.predict(preprocessed_input)
-    if(prediction==1): 
-        output = "The patient seems to be have heart disease"
-    else:
-        output = "The patient seems to be Normal"
+    data_dict['processed'] = False  # Add a processed field and set it to False
     conn.test.test.insert_one(data_dict)
-    return {"prediction": output}
+    return {"message": "User data stored successfully"}
+
 
