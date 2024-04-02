@@ -31,10 +31,14 @@ class UserData(BaseModel):
 
 @app.post("/store_user_data")
 async def store_user_data(data: UserData):
-    data_dict = data.dict()
-    data_dict['processed'] = False  # Add a processed field and set it to False
-    conn.test.test.insert_one(data_dict)
-    return {"message": "User data stored successfully"}
+    try:
+        data_dict = data.dict()
+        data_dict['processed'] = False
+        conn.test.test.insert_one(data_dict)
+        return {"message": "User data stored successfully"}
+    except Exception as e:
+        print(f"Error storing user data: {e}")
+        return {"message": "Error: Failed to store user data"}
 
 # When fetching user data for prediction
 @app.get("/predict_from_mongodb")
